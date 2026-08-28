@@ -1,0 +1,24 @@
+{
+  "users": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "username": "manufacturer_demo",
+      "email": "manufacturer_demo@flowcapital.internal",
+      "password_hash": "$2b$12$pigIRM/MFv3XpNOpjZ9ueuUG9TWHQJVicniANB3GmJx4whhlJS9Oe",
+      "role": "MANUFACTURER",
+      "company_name": "VoltRide Mobility Pvt. Ltd.",
+      "full_name": "Demo Manufacturer",
+      "designation": "Operations Lead"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000002",
+      "username": "lender_demo",
+      "email": "lender_demo@flowcapital.internal",
+      "password_hash": "$2b$12$c4Zxht1yxEH8Sb72J7APSeTtTIZ9hXcCUm4.KRVIP1IxyLO13EBnS",
+      "role": "LENDER",
+      "company_name": "Apex Capital Partners",
+      "full_name": "Demo Lender",
+      "designation": "Underwriter"
+    }
+  ]
+}
