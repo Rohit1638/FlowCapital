@@ -345,3 +345,141 @@ CREATE TABLE IF NOT EXISTS instrument_transitions (
 ALTER TABLE assets ADD COLUMN IF NOT EXISTS manufacturer_id UUID REFERENCES profiles (id) ON DELETE SET NULL;
 ALTER TABLE assets ADD COLUMN IF NOT EXISTS production_request_id UUID REFERENCES production_requests (id) ON DELETE SET NULL;
 CREATE INDEX IF NOT EXISTS idx_assets_manufacturer ON assets (manufacturer_id);
+
+-- Simulation Center (Module 6A extension — isolated demo simulation state)
+CREATE TABLE IF NOT EXISTS simulation_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    simulation_code TEXT NOT NULL UNIQUE,
+    production_request_id UUID NOT NULL REFERENCES production_requests (id) ON DELETE CASCADE,
+    status TEXT NOT NULL DEFAULT 'READY' CHECK (status IN ('READY', 'RUNNING', 'PAUSED', 'COMPLETED')),
+    mode TEXT NOT NULL DEFAULT 'MANUAL' CHECK (mode IN ('MANUAL', 'AUTO')),
+    current_stage TEXT NOT NULL DEFAULT 'PO_SIGNED',
+    stage_index INTEGER NOT NULL DEFAULT 0,
+    confidence_score INTEGER NOT NULL DEFAULT 78,
+    starting_confidence INTEGER NOT NULL DEFAULT 78,
+    risk_level TEXT NOT NULL DEFAULT 'MODERATE_CONFIDENCE',
+    production_progress NUMERIC(5, 2) NOT NULL DEFAULT 0,
+    quantity_planned NUMERIC(18, 2) NOT NULL DEFAULT 0,
+    quantity_completed NUMERIC(18, 2) NOT NULL DEFAULT 0,
+    delay_days INTEGER NOT NULL DEFAULT 0,
+    expected_completion_days INTEGER NOT NULL DEFAULT 45,
+    funding_requested NUMERIC(18, 2) NOT NULL DEFAULT 0,
+    collateral_value NUMERIC(18, 2) NOT NULL DEFAULT 0,
+    financing_exposure NUMERIC(18, 2) NOT NULL DEFAULT 0,
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    started_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS simulation_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    simulation_session_id UUID NOT NULL REFERENCES simulation_sessions (id) ON DELETE CASCADE,
+    production_request_id UUID NOT NULL REFERENCES production_requests (id) ON DELETE CASCADE,
+    stage TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    description TEXT NOT NULL,
+    severity TEXT NOT NULL DEFAULT 'info',
+    confidence_before INTEGER NOT NULL,
+    confidence_after INTEGER NOT NULL,
+    risk_level TEXT NOT NULL,
+    production_progress NUMERIC(5, 2) NOT NULL DEFAULT 0,
+    financial_impact JSONB NOT NULL DEFAULT '{}'::jsonb,
+    generated_by TEXT NOT NULL DEFAULT 'simulation',
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_simulation_sessions_request ON simulation_sessions (production_request_id);
+CREATE INDEX IF NOT EXISTS idx_simulation_events_session ON simulation_events (simulation_session_id);
+
+-- Module 1: Competitive capital marketplace — financing offers
+
+CREATE TABLE IF NOT EXISTS financing_offers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    request_id UUID NOT NULL REFERENCES production_requests (id) ON DELETE CASCADE,
+    production_request_id UUID REFERENCES production_requests (id) ON DELETE CASCADE,
+    lender_id UUID NOT NULL REFERENCES profiles (id) ON DELETE CASCADE,
+    lender_name TEXT NOT NULL,
+    offered_amount NUMERIC(18, 2) NOT NULL CHECK (offered_amount > 0),
+    interest_rate NUMERIC(6, 3) NOT NULL CHECK (interest_rate >= 0),
+    tenor_days INTEGER NOT NULL CHECK (tenor_days > 0),
+    instrument_type TEXT NOT NULL DEFAULT 'PRODUCTION_FINANCE',
+    conditions JSONB NOT NULL DEFAULT '[]'::jsonb,
+    notes TEXT,
+    status TEXT NOT NULL DEFAULT 'PENDING' CHECK (
+        status IN ('DRAFT', 'PENDING', 'ACCEPTED', 'WITHDRAWN', 'EXPIRED', 'REJECTED', 'WON', 'LOST')
+    ),
+    processing_fee NUMERIC(18, 2),
+    collateral_requirement TEXT,
+    disbursement_schedule JSONB,
+    valid_until TIMESTAMPTZ,
+    ai_recommendation_snapshot JSONB,
+    confidence_snapshot INTEGER,
+    risk_snapshot TEXT,
+    financeable_value_snapshot NUMERIC(18, 2),
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_financing_offers_request ON financing_offers (request_id, status);
+CREATE INDEX IF NOT EXISTS idx_financing_offers_lender ON financing_offers (lender_id, status);
+
+-- Module 2: Exposure ledger — duplicate financing protection
+
+CREATE TABLE IF NOT EXISTS exposure_ledger_entries (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    manufacturer_id UUID NOT NULL REFERENCES profiles (id) ON DELETE CASCADE,
+    financing_request_id UUID NOT NULL REFERENCES production_requests (id) ON DELETE CASCADE,
+    asset_id UUID,
+    collateral_id UUID,
+    lender_id UUID REFERENCES profiles (id) ON DELETE SET NULL,
+    financing_id UUID,
+    offer_id UUID REFERENCES financing_offers (id) ON DELETE SET NULL,
+    exposure_type TEXT NOT NULL CHECK (
+        exposure_type IN ('PENDING', 'RESERVED', 'ACTIVE', 'REPAID', 'RELEASED', 'CANCELLED', 'DEFAULTED')
+    ),
+    amount NUMERIC(18, 2) NOT NULL CHECK (amount >= 0),
+    currency TEXT NOT NULL DEFAULT 'INR',
+    status TEXT NOT NULL CHECK (
+        status IN ('PENDING', 'RESERVED', 'ACTIVE', 'REPAID', 'RELEASED', 'CANCELLED', 'DEFAULTED')
+    ),
+    effective_from TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    effective_until TIMESTAMPTZ,
+    created_by UUID REFERENCES profiles (id) ON DELETE SET NULL,
+    reference_type TEXT,
+    reference_id TEXT,
+    notes TEXT,
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_exposure_request ON exposure_ledger_entries (financing_request_id, status);
+CREATE INDEX IF NOT EXISTS idx_exposure_lender ON exposure_ledger_entries (lender_id, status);
+
+CREATE TABLE IF NOT EXISTS risk_alerts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID NOT NULL,
+    financing_request_id UUID NOT NULL,
+    manufacturer_id UUID,
+    lender_id UUID,
+    event_id UUID,
+    previous_confidence_score INTEGER NOT NULL,
+    new_confidence_score INTEGER NOT NULL,
+    previous_risk_level TEXT NOT NULL,
+    new_risk_level TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    reason TEXT,
+    recommended_action TEXT,
+    alert_status TEXT NOT NULL DEFAULT 'PENDING',
+    n8n_triggered BOOLEAN NOT NULL DEFAULT FALSE,
+    notification_sent BOOLEAN NOT NULL DEFAULT FALSE,
+    notification_error TEXT,
+    trigger_reason_code TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_risk_alerts_project ON risk_alerts (financing_request_id, created_at DESC);

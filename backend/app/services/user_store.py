@@ -8,7 +8,7 @@ from pathlib import Path
 
 import bcrypt
 
-from app.core.auth import DEMO_LENDER_ID, DEMO_MANUFACTURER_ID
+from app.core.auth import DEMO_AGGRESSIVE_LENDER_ID, DEMO_CONSERVATIVE_LENDER_ID, DEMO_LENDER_ID, DEMO_MANUFACTURER_ID
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 USERS_FILE = DATA_DIR / "users.json"
@@ -24,6 +24,7 @@ class StoredUser:
     company_name: str
     full_name: str
     designation: str
+    phone: str | None = None
 
 
 def _hash_password(password: str) -> str:
@@ -47,6 +48,8 @@ class UserStore:
         try:
             raw = json.loads(USERS_FILE.read_text(encoding="utf-8"))
             for item in raw.get("users", []):
+                if "phone" not in item:
+                    item = {**item, "phone": None}
                 user = StoredUser(**item)
                 self._users[user.username.lower()] = user
         except Exception:
@@ -56,6 +59,13 @@ class UserStore:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         payload = {"users": [asdict(u) for u in self._users.values()]}
         USERS_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        from app.services.platform_persistence import platform_persistence
+
+        for user in self._users.values():
+            platform_persistence.upsert_user(asdict(user))
+            from app.services.platform_repository import platform_repository
+
+            platform_repository.upsert_app_user(asdict(user))
 
     def _internal_email(self, username: str) -> str:
         safe = username.lower().replace(" ", "_")
@@ -71,15 +81,37 @@ class UserStore:
                 "full_name": "Demo Manufacturer",
                 "designation": "Operations Lead",
                 "id": DEMO_MANUFACTURER_ID,
+                "phone": "+919943666848",
             },
             {
                 "username": "lender_demo",
                 "password": "FlowDemo@123",
                 "role": "LENDER",
-                "company_name": "Apex Capital Partners",
+                "company_name": "Balanced Growth Capital",
                 "full_name": "Demo Lender",
                 "designation": "Underwriter",
                 "id": DEMO_LENDER_ID,
+                "phone": "+919043775875",
+            },
+            {
+                "username": "conservative_demo",
+                "password": "FlowDemo@123",
+                "role": "LENDER",
+                "company_name": "Conservative Capital Partners",
+                "full_name": "Conservative Lender",
+                "designation": "Senior Credit Officer",
+                "id": DEMO_CONSERVATIVE_LENDER_ID,
+                "phone": "+919943666848",
+            },
+            {
+                "username": "aggressive_demo",
+                "password": "FlowDemo@123",
+                "role": "LENDER",
+                "company_name": "Aggressive Supply Chain Capital",
+                "full_name": "Aggressive Lender",
+                "designation": "Portfolio Manager",
+                "id": DEMO_AGGRESSIVE_LENDER_ID,
+                "phone": "+919943666848",
             },
         ]
         changed = False
@@ -95,12 +127,34 @@ class UserStore:
                     company_name=seed["company_name"],
                     full_name=seed["full_name"],
                     designation=seed["designation"],
+                    phone=seed.get("phone"),
+                )
+                changed = True
+            elif not self._users[key].phone and seed.get("phone"):
+                existing = self._users[key]
+                self._users[key] = StoredUser(
+                    id=existing.id,
+                    username=existing.username,
+                    email=existing.email,
+                    password_hash=existing.password_hash,
+                    role=existing.role,
+                    company_name=existing.company_name,
+                    full_name=existing.full_name,
+                    designation=existing.designation,
+                    phone=seed["phone"],
                 )
                 changed = True
         if changed:
             self._persist()
 
-    def register(self, username: str, password: str, role: str, company_name: str | None = None) -> StoredUser:
+    def register(
+        self,
+        username: str,
+        password: str,
+        role: str,
+        company_name: str | None = None,
+        phone: str | None = None,
+    ) -> StoredUser:
         key = username.strip().lower()
         if not key or len(password) < 8:
             raise ValueError("Invalid username or password")
@@ -108,6 +162,9 @@ class UserStore:
             raise ValueError("Username already exists")
         if role not in ("MANUFACTURER", "LENDER"):
             raise ValueError("Invalid role")
+        normalized_phone = self._normalize_phone(phone)
+        if not normalized_phone:
+            raise ValueError("A valid phone number is required (E.164 format, e.g. +919876543210)")
         user = StoredUser(
             id=str(uuid.uuid4()),
             username=username.strip(),
@@ -117,9 +174,13 @@ class UserStore:
             company_name=company_name or username.strip(),
             full_name=username.strip().replace("_", " ").title(),
             designation="Member",
+            phone=normalized_phone,
         )
         self._users[key] = user
-        self._persist()
+        try:
+            self._persist()
+        except Exception:
+            pass
         return user
 
     def authenticate(self, username: str, password: str) -> StoredUser | None:
@@ -144,6 +205,32 @@ class UserStore:
                 return user
         return None
 
+    @staticmethod
+    def normalize_phone(phone: str | None) -> str | None:
+        return UserStore._normalize_phone(phone)
+
+    def get_phone(self, user_id: str) -> str | None:
+        for user in self._users.values():
+            if user.id == user_id:
+                return user.phone
+        return None
+
+    @staticmethod
+    def _normalize_phone(phone: str | None) -> str | None:
+        if not phone:
+            return None
+        cleaned = phone.strip().replace(" ", "").replace("-", "")
+        if not cleaned:
+            return None
+        digits = cleaned.lstrip("+")
+        if digits.isdigit() and len(digits) == 10:
+            cleaned = f"+91{digits}"
+        elif not cleaned.startswith("+"):
+            cleaned = f"+{digits.lstrip('0')}" if digits.isdigit() else cleaned
+        if len(cleaned) < 11 or not cleaned[1:].isdigit():
+            return None
+        return cleaned
+
     def profile_dict(self, user: StoredUser) -> dict:
         return {
             "id": user.id,
@@ -154,6 +241,7 @@ class UserStore:
             "company_name": user.company_name,
             "designation": user.designation,
             "username": user.username,
+            "phone": user.phone,
         }
 
 

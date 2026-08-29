@@ -90,7 +90,8 @@ Login: http://localhost:3005/login → click **Enter as Manufacturer** or **Ente
 |------|-----|
 | Login | http://localhost:3005/login |
 | Dashboard | http://localhost:3005/manufacturer/dashboard |
-| Production plan (demo) | http://localhost:3005/manufacturer/production-plans/00000000-0000-4000-8000-000000000100 |
+| Production plan (demo) | http://localhost:3000/manufacturer/production-plans/00000000-0000-4000-8000-000000000100 |
+| Compare offers | http://localhost:3000/manufacturer/financing-request/00000000-0000-4000-8000-000000000100/offers |
 | Financing request | http://localhost:3005/manufacturer/financing-request |
 | AI Assistant | http://localhost:3005/manufacturer/ai-assistant |
 
@@ -99,19 +100,47 @@ Login: http://localhost:3005/login → click **Enter as Manufacturer** or **Ente
 | Page | URL |
 |------|-----|
 | Dashboard | http://localhost:3005/lender/dashboard |
-| Demo opportunity | http://localhost:3005/lender/opportunities/00000000-0000-4000-8000-000000000100 |
+| Demo opportunity | http://localhost:3005/lender/opportunities/00000000-0000-4000-8000-000000000100/decision |
+| Simulation | http://localhost:3005/lender/simulator |
+| Reassessments | http://localhost:3005/lender/reassessments |
 
-## Legacy Module 1–6
-- Command Center: http://localhost:3005/dashboard
+### Reassessment demo (2 minutes)
+
+1. Log in as **`lender_demo`** / `FlowDemo@123`
+2. Open **Reassessments** — you should see a seeded **warehouse mismatch** reassessment (PR-EB-1000)
+3. Click **Review reassessment** → **Acknowledge** or **Continue monitoring**
+4. Optional: click **Trigger demo reassessment** for a production-delay event (confidence drop)
+5. Or open **Simulation** → **Start** → **Simulate next event** several times — material steps add new reassessment cards
+
+---
+
+### Compare lender offers demo (2 minutes)
+
+1. Log in as **`manufacturer_demo`** / `FlowDemo@123`
+2. Open **Dashboard** → on PR-EB-1000 click **Compare offers**  
+   Or go directly: http://localhost:3000/manufacturer/financing-request/00000000-0000-4000-8000-000000000100/offers
+3. You will see **3 competing offers** ranked side-by-side:
+
+| Lender | Amount | Rate | Tenor | Conditions | Demo talking point |
+|--------|--------|------|-------|------------|-------------------|
+| **Balanced Growth Capital** (Rank #1) | ₹22L | 11.5% | 120 days | Warehouse audit, PO re-verification | Platform recommendation — balanced cost, coverage, and tenor |
+| **Aggressive Supply Chain Capital** | ₹28L | 13.25% | 150 days | Weekly milestone reporting | Highest funding — covers 56% of ₹50L requested |
+| **Conservative Capital Partners** | ₹18L | 9.75% | 90 days | Collateral inspection, buyer letter, quantity reconciliation | Lowest rate — stricter covenants for cost-sensitive manufacturers |
+
+4. Sort by **Recommended**, **Lowest rate**, **Highest amount**, or **Fewest conditions**
+5. Click **Accept offer** on the recommended Balanced Growth offer → confirm → competing offers auto-close
+
+**One-liner for judges:** *"Three lenders bid on the same verified production request — FlowCapital ranks them by effective cost, funding fit, and conditions so the manufacturer picks the best deal in one click."*
 
 ---
 
 ## Demo scenario (PR-EB-1000)
 
 - **VoltRide Mobility** — 1,000 electric bikes
-- **₹50L** funding requested, **₹20L** conditionally approved
-- **68%** confidence, **1 open conflict** (quantity mismatch 1000 vs 920)
-- Lifecycle stage: **In Production**
+- **₹50L** funding requested, **₹38L** verified safe capacity (no pre-allocated exposure)
+- **3 pending lender offers** (₹18L–₹28L, rates 9.75%–13.25%)
+- **68%** confidence, quantity mismatch event in timeline
+- Lifecycle stage: **In Production** (~70%)
 
 ---
 

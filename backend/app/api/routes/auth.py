@@ -51,19 +51,15 @@ def _profile_from_demo(token: str) -> ProfileRead:
         designation=user["designation"],
 
         username=token.replace("demo-", "") + "_demo",
-
+        phone=user.get("phone"),
     )
-
-
-
-
 
 @router.post("/register", response_model=LoginResponse, status_code=status.HTTP_201_CREATED)
 def register(payload: RegisterRequest):
     if payload.password != payload.confirm_password:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Passwords do not match")
     try:
-        user = user_store.register(payload.username, payload.password, payload.role, payload.company_name)
+        user = user_store.register(payload.username, payload.password, payload.role, payload.company_name, payload.phone)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     token = user_store.create_session(user)
@@ -128,6 +124,6 @@ def me(user=Depends(get_current_user)):
         designation=user.designation,
 
         username=getattr(user, "username", None),
-
+        phone=getattr(user, "phone", None),
     )
 

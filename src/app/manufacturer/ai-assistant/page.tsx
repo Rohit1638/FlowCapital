@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { BrandWordmark } from "@/components/shared/Logo";
 import { PlatformShell } from "@/components/platform/PlatformShell";
 import { AIAssistantPanel } from "@/components/platform/AIAssistantPanel";
 import { ManufacturerContent } from "@/components/platform/ManufacturerContent";
@@ -37,8 +37,8 @@ export default function ManufacturerAIAssistantPage() {
     <PlatformShell role="MANUFACTURER">
       <ManufacturerContent className="space-y-8">
         <header>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">AI Assistant</p>
-          <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight">Your production and financing copilot</h1>
+          <BrandWordmark size="sm" className="mb-3" />
+          <h1 className="font-display text-3xl font-semibold tracking-tight">Your production and financing copilot</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Structured insights on confidence, funding readiness, documents, and lifecycle events — powered by deterministic finance with AI explanation.
           </p>
@@ -64,9 +64,8 @@ export default function ManufacturerAIAssistantPage() {
           animate={{ opacity: 1, y: 0 }}
           className="rounded-[1.25rem] border border-foreground/10 bg-ink p-6 md:p-8"
         >
-          <div className="mb-4 flex items-center gap-2 text-lime">
-            <Sparkles className="h-5 w-5" />
-            <span className="text-sm font-semibold uppercase tracking-wide">Flow Assistant</span>
+          <div className="mb-4">
+            <BrandWordmark inverted size="sm" />
           </div>
           {auth.token ? (
             <AIAssistantPanel

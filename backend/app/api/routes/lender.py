@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
 from app.core.auth import LenderUser
-from app.schemas.platform import LenderDecisionCreate
+from app.schemas.platform import FinancingOfferCreate, FinancingOfferUpdate, LenderDecisionCreate
 from app.services.demo_platform_store import demo_store
 
 router = APIRouter(prefix="/lender", tags=["Lender"])
@@ -34,3 +34,26 @@ def decide(request_id: str, payload: LenderDecisionCreate, user: LenderUser):
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Request not found")
     return result
+
+
+@router.post("/requests/{request_id}/offer", status_code=status.HTTP_201_CREATED)
+def submit_offer(request_id: str, payload: FinancingOfferCreate, user: LenderUser):
+    try:
+        offer = demo_store.submit_lender_offer(request_id, user.id, payload.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    return offer
+
+
+@router.patch("/requests/{request_id}/offer/{offer_id}")
+def update_offer(request_id: str, offer_id: str, payload: FinancingOfferUpdate, user: LenderUser):
+    try:
+        offer = demo_store.update_lender_offer(request_id, offer_id, user.id, payload.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    return offer
+
+
+@router.get("/offers")
+def list_my_offers(user: LenderUser):
+    return {"items": demo_store.list_lender_offers(user.id)}

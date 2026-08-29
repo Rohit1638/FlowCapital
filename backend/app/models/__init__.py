@@ -1,7 +1,3 @@
-from app.models.asset import Asset
-from app.models.asset_event import AssetEvent
-from app.models.audit_log import AuditLog
-from app.models.conflict import Conflict
-from app.models.verification import Verification
+"""SQLAlchemy models — Module 6A platform schema lives in app.models.platform."""
 
-__all__ = ["Asset", "AssetEvent", "AuditLog", "Conflict", "Verification"]
+__all__: list[str] = []

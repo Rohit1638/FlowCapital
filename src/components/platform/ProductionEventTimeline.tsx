@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import {
   AlertTriangle,
   Box,
@@ -36,18 +37,9 @@ function formatEventDate(timestamp?: string): string {
 
 function eventImpact(event: WorkflowEvent): string | null {
   const type = event.event_type.toUpperCase();
-  if (type.includes("QUANTITY")) {
-    if (event.description?.includes("→") || event.description?.includes("1000")) {
-      return `${event.description} Potential impact: funding requirement may change.`;
-    }
-    return "Potential impact: funding requirement or collateral alignment may change.";
-  }
-  if (type.includes("DELAY")) {
-    return "Potential impact: expected repayment timeline may shift.";
-  }
-  if (type.includes("PRODUCTION") && event.description?.includes("%")) {
-    return "Production progress update — supports ongoing exposure monitoring.";
-  }
+  if (type.includes("DELAY")) return "Repayment timeline may shift";
+  if (type.includes("QUANTITY")) return "Funding requirement may change";
+  if (type.includes("PRODUCTION") && event.description?.includes("%")) return "Progress update";
   return null;
 }
 
@@ -62,50 +54,55 @@ export function ProductionEventTimeline({ events, className }: ProductionEventTi
   );
 
   return (
-    <section className={cn("rounded-[1.25rem] border border-foreground/10 bg-white p-6 md:p-7", className)}>
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Production event history</p>
-        <p className="mt-1 text-sm text-muted-foreground">Recent operational changes reported by the manufacturer.</p>
-      </div>
-      <div className="mt-6 space-y-0">
+    <section className={cn("rounded-[1.25rem] border border-foreground/10 bg-white p-5 md:p-6", className)}>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Production events</p>
+
+      <div className="mt-4 space-y-3">
         {sorted.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No production events recorded yet.</p>
+          <p className="py-4 text-center text-sm text-muted-foreground">No events recorded yet.</p>
         ) : (
           sorted.map((event, idx) => {
             const Icon = EVENT_ICONS[event.event_type.toUpperCase()] ?? RefreshCw;
             const impact = eventImpact(event);
-            const isWarning = event.severity === "warning" || event.event_type.includes("MISMATCH") || event.event_type.includes("DELAY");
+            const isWarning =
+              event.severity === "warning" ||
+              event.event_type.includes("MISMATCH") ||
+              event.event_type.includes("DELAY");
+
             return (
-              <div key={event.event_code ?? `${event.event_type}-${idx}`} className="relative flex gap-4 pb-6 last:pb-0">
-                {idx < sorted.length - 1 ? (
-                  <span className="absolute left-[11px] top-6 h-[calc(100%-12px)] w-px bg-foreground/10" />
-                ) : null}
+              <motion.div
+                key={event.event_code ?? `${event.event_type}-${idx}`}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.05, duration: 0.3 }}
+                className={cn(
+                  "group flex gap-3 rounded-xl border border-foreground/8 p-3 transition hover:border-lime/30 hover:bg-surface-2/40",
+                  idx === 0 && "border-lime/25 bg-lime/[0.04]",
+                )}
+              >
                 <div
                   className={cn(
-                    "relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border",
-                    isWarning ? "border-amber-500/40 bg-amber-50 text-amber-700" : "border-cyan/30 bg-cyan/5 text-cyan-700",
+                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+                    isWarning ? "bg-amber-500/10 text-amber-700" : "bg-lime/15 text-lime-deep",
                   )}
                 >
-                  <Icon className="h-3 w-3" />
+                  <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                    <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       {formatEventDate(event.timestamp)}
                     </span>
-                    <span className="text-[11px] font-semibold uppercase tracking-wide text-ink">
-                      · {event.event_type.replace(/_/g, " ")}
-                    </span>
+                    <span className="text-xs font-semibold text-ink">{event.event_type.replace(/_/g, " ")}</span>
+                    {impact ? (
+                      <span className="rounded-full bg-foreground/5 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                        {impact}
+                      </span>
+                    ) : null}
                   </div>
-                  <p className="mt-1 text-sm text-foreground/90">{event.description}</p>
-                  {impact ? (
-                    <p className="mt-2 rounded-lg border border-foreground/8 bg-surface-2 px-3 py-2 text-xs text-muted-foreground">
-                      <span className="font-semibold uppercase tracking-wide text-ink/70">Financial impact · </span>
-                      {impact}
-                    </p>
-                  ) : null}
+                  <p className="mt-0.5 text-sm leading-snug text-foreground/85">{event.description}</p>
                 </div>
-              </div>
+              </motion.div>
             );
           })
         )}

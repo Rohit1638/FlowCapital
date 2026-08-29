@@ -1,6 +1,3 @@
-import type { LifecycleStage, RiskLevel } from "@/types/asset";
-import { getLifecycleLabel as lifecycleLabel, getRiskColorClass as riskColorClass, getRiskLabel as riskLabelFromScore } from "@/lib/lifecycle";
-
 const LAKH = 100_000;
 const CRORE = 10_000_000;
 
@@ -74,18 +71,6 @@ export function formatRelativeTime(value: string, now: Date = new Date()): strin
   if (days === 1) return "Yesterday";
   if (days < 14) return `${days} days ago`;
   return formatDate(value);
-}
-
-export function getRiskLabel(score: number, closed = false): RiskLevel {
-  return riskLabelFromScore(score, closed);
-}
-
-export function getRiskColorClass(level: RiskLevel): string {
-  return riskColorClass(level);
-}
-
-export function getLifecycleLabel(stage: LifecycleStage): string {
-  return lifecycleLabel(stage);
 }
 
 function trimNumber(value: number, decimals?: number): string {

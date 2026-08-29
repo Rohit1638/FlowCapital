@@ -12,15 +12,15 @@ export function LandingFooter() {
           </p>
         </div>
         <div className="flex flex-wrap gap-6 text-sm text-ink/70">
-          <Link href="/dashboard">Command Center</Link>
+          <Link href="/login?portal=1">Platform login</Link>
           <a href="#how-it-works">How it works</a>
           <a href="#memory">Financial memory</a>
         </div>
       </div>
       <div className="border-t border-foreground/10">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-5 py-5 text-xs text-muted-foreground md:flex-row md:justify-between md:px-8">
-          <p>Module 1 frontend foundation · mock data only</p>
-          <p>Prepared for FastAPI, Supabase, and LangGraph.</p>
+          <p>FlowCapital AI · Module 6A platform demo</p>
+          <p>Manufacturer & lender intelligence desk</p>
         </div>
       </div>
     </footer>

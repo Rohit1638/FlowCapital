@@ -3,21 +3,32 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ExposureCapacityPanel } from "@/components/platform/ExposureCapacityPanel";
+import { FinancingHealthPanel } from "@/components/platform/FinancingHealthPanel";
+import { FinancingLifecyclePanel } from "@/components/platform/FinancingLifecyclePanel";
 import { PlatformShell } from "@/components/platform/PlatformShell";
 import { ManufacturerContent } from "@/components/platform/ManufacturerContent";
 import { PlatformMetricCard } from "@/components/platform/PlatformMetricCard";
 import { useRequireRole } from "@/lib/auth/auth-context";
 import { formatINRCompact } from "@/lib/format";
-import { fetchManufacturerDashboard } from "@/lib/platform/hooks";
+import { fetchFinancingHealth, fetchManufacturerDashboard, fetchManufacturerLifecycle } from "@/lib/platform/hooks";
+import { DEMO_REQUEST_ID } from "@/lib/platform/demo-fallback";
 import { normalizeLifecycleStage } from "@/lib/platform/lifecycle-stages";
+import type { FinancingHealth, FinancingLifecycleView } from "@/types/platform";
 
 export default function ManufacturerDashboardPage() {
   const auth = useRequireRole("MANUFACTURER");
   const [data, setData] = useState<Awaited<ReturnType<typeof fetchManufacturerDashboard>> | null>(null);
 
+  const [lifecycle, setLifecycle] = useState<FinancingLifecycleView | null>(null);
+  const [health, setHealth] = useState<FinancingHealth | null>(null);
+
   useEffect(() => {
     if (!auth.token) return;
     fetchManufacturerDashboard(auth.token).then(setData);
+    const reqId = DEMO_REQUEST_ID;
+    fetchManufacturerLifecycle(auth.token, reqId).then(setLifecycle).catch(() => null);
+    fetchFinancingHealth(auth.token, reqId).then(setHealth).catch(() => null);
   }, [auth.token]);
 
   const primaryRequest = data?.requests?.[0];
@@ -99,6 +110,12 @@ export default function ManufacturerDashboardPage() {
           />
         </div>
 
+        {data?.capital_capacity ? <ExposureCapacityPanel snapshot={data.capital_capacity} variant="manufacturer" /> : null}
+
+        {health ? <FinancingHealthPanel health={health} requestId={primaryRequest?.id ?? DEMO_REQUEST_ID} /> : null}
+
+        {lifecycle ? <FinancingLifecyclePanel lifecycle={lifecycle} requestId={primaryRequest?.id ?? DEMO_REQUEST_ID} /> : null}
+
         {/* Active production section */}
         <section className="space-y-4">
           <h2 className="font-display text-xl font-semibold tracking-tight">Active Production</h2>
@@ -133,12 +150,20 @@ export default function ManufacturerDashboardPage() {
                       <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Funding Status</p>
                       <p className="mt-1 font-semibold text-lime-deep">{formatINRCompact(approved)} approved</p>
                     </div>
-                    <Link
-                      href={`/manufacturer/production-plans/${req.id}`}
-                      className="inline-flex items-center justify-center rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5"
-                    >
+                    <div className="flex flex-col gap-2">
+                      <Link
+                        href={`/manufacturer/financing-request/${req.id}/offers`}
+                        className="inline-flex items-center justify-center rounded-full bg-lime px-5 py-2.5 text-sm font-semibold text-ink transition hover:brightness-95"
+                      >
+                        Compare offers
+                      </Link>
+                      <Link
+                        href={`/manufacturer/production-plans/${req.id}`}
+                        className="inline-flex items-center justify-center rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5"
+                      >
                       View Production
                     </Link>
+                  </div>
                   </div>
                   <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-muted">
                     <div className="h-full rounded-full bg-lime transition-all duration-700" style={{ width: `${req.progress_pct}%` }} />

@@ -24,8 +24,8 @@ export function LandingHero() {
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Button asChild variant="dark" size="lg">
-            <Link href="/dashboard">
-              Enter Command Center
+            <Link href="/login?portal=1">
+              Enter platform
               <ArrowRight />
             </Link>
           </Button>

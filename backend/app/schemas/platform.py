@@ -12,6 +12,7 @@ class ProfileRead(BaseModel):
     company_name: str | None = None
     designation: str | None = None
     username: str | None = None
+    phone: str | None = None
 
 
 class RegisterRequest(BaseModel):
@@ -20,6 +21,7 @@ class RegisterRequest(BaseModel):
     confirm_password: str = Field(..., min_length=8)
     role: str = Field(..., pattern="^(MANUFACTURER|LENDER)$")
     company_name: str | None = None
+    phone: str = Field(..., min_length=10, max_length=20, pattern=r"^\+?[0-9]{10,15}$")
 
 
 class LoginRequest(BaseModel):
@@ -75,6 +77,28 @@ class LenderDecisionCreate(BaseModel):
     reason: str | None = None
     notes: str | None = None
     conditions: list[str] = Field(default_factory=list)
+
+
+class FinancingOfferCreate(BaseModel):
+    offered_amount: float = Field(..., gt=0)
+    interest_rate: float = Field(..., ge=0, le=100)
+    tenor_days: int = Field(..., gt=0, le=730)
+    instrument_type: str = "PRODUCTION_FINANCE"
+    conditions: list[str] = Field(default_factory=list)
+    notes: str | None = None
+    validity_days: int = Field(default=14, ge=1, le=90)
+    valid_until: str | None = None
+
+
+class FinancingOfferUpdate(BaseModel):
+    offered_amount: float = Field(..., gt=0)
+    interest_rate: float = Field(..., ge=0, le=100)
+    tenor_days: int = Field(..., gt=0, le=730)
+    instrument_type: str = "PRODUCTION_FINANCE"
+    conditions: list[str] = Field(default_factory=list)
+    notes: str | None = None
+    validity_days: int = Field(default=14, ge=1, le=90)
+    valid_until: str | None = None
 
 
 class AIQuestionRequest(BaseModel):

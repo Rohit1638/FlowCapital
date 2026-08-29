@@ -7,6 +7,8 @@ from fastapi import Depends, Header, HTTPException, status
 
 DEMO_MANUFACTURER_ID = "00000000-0000-4000-8000-000000000001"
 DEMO_LENDER_ID = "00000000-0000-4000-8000-000000000002"
+DEMO_CONSERVATIVE_LENDER_ID = "00000000-0000-4000-8000-000000000004"
+DEMO_AGGRESSIVE_LENDER_ID = "00000000-0000-4000-8000-000000000005"
 
 DEMO_USERS = {
     "demo-manufacturer": {
@@ -18,16 +20,40 @@ DEMO_USERS = {
         "company_name": "VoltRide Mobility Pvt. Ltd.",
         "designation": "Chief Operations Officer",
         "username": "manufacturer_demo",
+        "phone": "+919943666848",
     },
     "demo-lender": {
         "id": DEMO_LENDER_ID,
         "full_name": "Arjun Mehta",
-        "email": "arjun@apexcapital.in",
-        "organization_name": "Apex Capital Partners",
+        "email": "arjun@balancedgrowth.in",
+        "organization_name": "Balanced Growth Capital",
         "role": "LENDER",
-        "company_name": "Apex Capital Partners",
+        "company_name": "Balanced Growth Capital",
         "designation": "Head of Supply Chain Finance",
         "username": "lender_demo",
+        "phone": "+919943666848",
+    },
+    "demo-conservative": {
+        "id": DEMO_CONSERVATIVE_LENDER_ID,
+        "full_name": "Neha Kapoor",
+        "email": "neha@conservativecapital.in",
+        "organization_name": "Conservative Capital Partners",
+        "role": "LENDER",
+        "company_name": "Conservative Capital Partners",
+        "designation": "Senior Credit Officer",
+        "username": "conservative_demo",
+        "phone": "+919943666848",
+    },
+    "demo-aggressive": {
+        "id": DEMO_AGGRESSIVE_LENDER_ID,
+        "full_name": "Rahul Desai",
+        "email": "rahul@aggressivesc.in",
+        "organization_name": "Aggressive Supply Chain Capital",
+        "role": "LENDER",
+        "company_name": "Aggressive Supply Chain Capital",
+        "designation": "Portfolio Manager",
+        "username": "aggressive_demo",
+        "phone": "+919943666848",
     },
 }
 
@@ -43,6 +69,7 @@ class AuthUser:
     designation: str | None
     is_demo: bool = False
     username: str | None = None
+    phone: str | None = None
 
 
 def _parse_demo_token(token: str) -> AuthUser | None:

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, RefreshCw, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+import { AIInsightResponseView } from "@/components/platform/AIInsightResponseView";
 import { Button } from "@/components/ui/button";
 import { platformFetch, platformFetchAuth } from "@/lib/platform/client";
 import { cn } from "@/lib/utils";
@@ -54,9 +56,6 @@ export function AIAssistantPanel({
       const result = await platformFetchAuth<AIInsightResponse>(token, path, { method: "POST", body });
       setResponse(result);
       setQuestion(prompt);
-      if (result.fallback_used) {
-        setError(null);
-      }
     } catch {
       setError("FlowCapital AI could not reach the intelligence service. Please try again.");
       setResponse(null);
@@ -65,8 +64,10 @@ export function AIAssistantPanel({
     }
   }, [role, productionRequestId, token]);
 
+  const dark = theme === "dark";
+
   return (
-    <div className={cn("rounded-[1.25rem] border p-6", theme === "dark" ? "border-white/10 bg-white/5 text-white" : "border-foreground/10 bg-white")}>
+    <div className={cn("rounded-[1.25rem] border p-6", dark ? "border-white/10 bg-white/5 text-white" : "border-foreground/10 bg-white")}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-lime-deep" />
@@ -78,13 +79,22 @@ export function AIAssistantPanel({
           </span>
         ) : null}
       </div>
-      <p className={cn("mt-2 text-sm", theme === "dark" ? "text-white/60" : "text-muted-foreground")}>
+      <p className={cn("mt-2 text-sm", dark ? "text-white/60" : "text-muted-foreground")}>
         Structured insights on confidence, funding readiness, and lifecycle evidence.
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2">
         {quickActions.map((action) => (
-          <button key={action} type="button" onClick={() => ask(action)} disabled={loading} className={cn("rounded-full border px-3 py-1.5 text-xs font-medium disabled:opacity-50", theme === "dark" ? "border-white/15 hover:bg-white/10" : "border-foreground/10 hover:bg-lime/20")}>
+          <button
+            key={action}
+            type="button"
+            onClick={() => ask(action)}
+            disabled={loading}
+            className={cn(
+              "rounded-full border px-3 py-1.5 text-xs font-medium transition disabled:opacity-50",
+              dark ? "border-white/15 hover:border-lime/30 hover:bg-white/10" : "border-foreground/10 hover:border-lime/40 hover:bg-lime/15",
+            )}
+          >
             {action}
           </button>
         ))}
@@ -95,7 +105,7 @@ export function AIAssistantPanel({
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="Ask about confidence, funding, or next steps…"
-          className={cn("flex-1 rounded-xl border px-4 py-2 text-sm", theme === "dark" ? "border-white/15 bg-white/5 text-white placeholder:text-white/40" : "border-foreground/10")}
+          className={cn("flex-1 rounded-xl border px-4 py-2 text-sm outline-none focus:border-lime/50 focus:ring-2 focus:ring-lime/15", dark ? "border-white/15 bg-white/5 text-white placeholder:text-white/40" : "border-foreground/10")}
           onKeyDown={(e) => e.key === "Enter" && ask(question)}
         />
         <Button onClick={() => ask(question)} disabled={loading || !question.trim()}>
@@ -104,7 +114,14 @@ export function AIAssistantPanel({
       </div>
 
       {loading ? (
-        <p className={cn("mt-4 text-sm", theme === "dark" ? "text-white/60" : "text-muted-foreground")}>Connecting to FlowCapital AI…</p>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className={cn("mt-4 flex items-center gap-3 rounded-xl border px-4 py-3", dark ? "border-white/10 bg-white/[0.04]" : "border-foreground/10 bg-surface-2/50")}
+        >
+          <Loader2 className={cn("h-4 w-4 animate-spin", dark ? "text-lime" : "text-lime-deep")} />
+          <p className={cn("text-sm", dark ? "text-white/60" : "text-muted-foreground")}>Analyzing your request…</p>
+        </motion.div>
       ) : null}
 
       {error ? (
@@ -117,14 +134,12 @@ export function AIAssistantPanel({
       ) : null}
 
       {response && !error ? (
-        <div className={cn("mt-4 rounded-2xl p-4 text-sm leading-relaxed whitespace-pre-wrap", theme === "dark" ? "bg-ink/60" : "bg-surface-2")}>
-          {response.content}
-          {response.fallback_used ? (
-            <p className="mt-3 text-xs uppercase tracking-[0.14em] text-muted-foreground">Using deterministic fallback insights</p>
-          ) : (
-            <p className="mt-3 text-xs uppercase tracking-[0.14em] text-lime-deep">Powered by {response.provider}</p>
-          )}
-        </div>
+        <AIInsightResponseView
+          content={response.content}
+          fallbackUsed={response.fallback_used}
+          provider={response.provider}
+          theme={theme}
+        />
       ) : null}
     </div>
   );

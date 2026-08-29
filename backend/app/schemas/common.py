@@ -29,6 +29,7 @@ class HealthResponse(APIModel):
     status: str = Field(description="healthy or degraded")
     service: str
     database: str
+    storage: str | None = None
     timestamp: datetime
 
 

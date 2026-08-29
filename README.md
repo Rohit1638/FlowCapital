@@ -10,14 +10,11 @@ FlowCapital AI is an agentic supply-chain working capital platform. It connects 
 
 FlowCapital helps manufacturers request production financing backed by verifiable evidence (purchase orders, production plans, collateral, lifecycle events) and gives lenders a structured decision workspace to approve, reject, or modify exposure with full auditability.
 
-The platform is built as a **Next.js frontend** + **FastAPI backend**, with two data layers:
+The platform is built as a **Next.js frontend** + **FastAPI backend**, with an in-memory **Module 6A demo store** for hackathon demos (works without a live database).
 
 | Layer | Purpose |
 |-------|---------|
-| **Module 6A (demo store)** | In-memory manufacturer/lender portals for hackathon demos — works without a live database |
-| **Modules 1–6 (Supabase)** | Persistent PostgreSQL for assets, events, verifications, conflicts, and audit logs |
-
-Both can run together; the manufacturer and lender portals primarily use Module 6A APIs while the legacy Command Center uses Supabase-backed routes.
+| **Module 6A (demo store)** | Manufacturer & lender portals — production plans, financing, simulation, reassessments, AI assistant |
 
 ---
 
@@ -38,11 +35,6 @@ Both can run together; the manufacturer and lender portals primarily use Module 
 - Lender AI intelligence copilot with contextual underwriting briefs
 - Decision audit trail for every lender action
 
-### Legacy Intelligence (Modules 1–6)
-- Command Center dashboard at `/dashboard`
-- Asset passport, event intelligence, decision center, allocation desk, risk views
-- Supabase-backed persistence for assets, events, verifications, and conflicts
-
 ### AI & Finance Engine
 - Deterministic confidence bands, financeable value, and exposure recommendations
 - Gemini-powered explanations (backend-only; keys never exposed to the browser)
@@ -56,7 +48,7 @@ Both can run together; the manufacturer and lender portals primarily use Module 
 |-------|--------------|
 | **Frontend** | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, shadcn/ui, Framer Motion, Recharts |
 | **Backend** | FastAPI, Python 3.11+, SQLAlchemy, Pydantic |
-| **Database** | Supabase PostgreSQL (Modules 1–6) |
+| **Database** | Optional Supabase PostgreSQL (Module 6A schema available in `backend/database/`) |
 | **AI** | Google Gemini (optional), deterministic fallback engine |
 | **Auth** | Demo username/password (bcrypt), role-based access (Manufacturer / Lender) |
 
@@ -71,16 +63,15 @@ FlowCapital/
 │   │   ├── manufacturer/          # Manufacturer portal routes
 │   │   ├── lender/                # Lender portal routes
 │   │   ├── login/                 # Authentication
-│   │   └── (app)/                 # Legacy Module 1–6 routes
+│   │   └── page.tsx               # Marketing landing
 │   ├── components/
 │   │   ├── platform/              # Portal UI (shell, lifecycle, decision workspace)
-│   │   ├── intelligence/          # Legacy intelligence components
+│   │   ├── landing/               # Marketing site
 │   │   └── shared/                # Shared UI primitives
 │   ├── lib/
 │   │   ├── platform/              # API client, hooks, demo fallback
-│   │   ├── intelligence/          # Valuation, risk, financing engines
 │   │   └── auth/                  # Auth context
-│   └── types/                     # TypeScript interfaces
+│   └── types/                     # platform.ts, simulation.ts
 ├── backend/
 │   ├── app/
 │   │   ├── api/routes/            # FastAPI route modules
@@ -207,16 +198,6 @@ Login at `/login` — click **Enter as Manufacturer** or **Enter as Lender**, or
 | Decision Workspace | `/lender/opportunities/[id]/decision` |
 | AI Assistant | `/lender/ai-assistant` |
 
-### Legacy (Modules 1–6)
-
-| Page | Route |
-|------|-------|
-| Command Center | `/dashboard` |
-| Assets | `/assets` |
-| Decisions | `/decisions` |
-| Intelligence | `/intelligence` |
-| Events | `/events` |
-
 ---
 
 ## Demo Scenario (PR-EB-1000)
@@ -248,7 +229,8 @@ All API routes are prefixed with `/api/v1`.
 | **Lender** | `/lender/dashboard`, `/lender/opportunities`, `/lender/requests/{id}/decide` | Lender underwriting |
 | **Production** | `/production-requests/{id}`, `/production-requests/{id}/documents` | Production requests & uploads |
 | **AI** | `/ai/manufacturer/insight`, `/ai/lender/underwriting-brief`, `/ai/health` | AI intelligence |
-| **Legacy** | `/assets`, `/events`, `/verifications`, `/conflicts`, `/audit` | Module 1–6 persistence |
+| **Simulation** | `/simulation/{id}/start`, `/simulation/{id}/next` | Lifecycle simulation |
+| **Reassessment** | `/events`, `/lender/reassessments` | Event intelligence & lender review |
 
 Interactive API documentation: http://localhost:8030/docs
 
@@ -256,18 +238,11 @@ Interactive API documentation: http://localhost:8030/docs
 
 ## Database Setup (Optional)
 
-Module 6A demo portals work without a database. To enable Modules 1–6 persistence:
+Module 6A demo portals work without a database. To persist platform data to Supabase later:
 
 1. Create a [Supabase](https://supabase.com) project
-2. Open the **SQL Editor** and run the contents of `backend/database/full_setup.sql`
-3. For Module 6A extended schema, also run `backend/database/schema_module_6a.sql`
-4. Set `DATABASE_URL` in `backend/.env`
-
-```powershell
-cd backend
-python -m app.db_init
-python -m app.seed.demo_seed
-```
+2. Run `backend/database/schema_module_6a.sql` in the SQL Editor
+3. Set `DATABASE_URL` in `backend/.env`
 
 ---
 

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { BrandWordmark } from "@/components/shared/Logo";
 import { PlatformShell } from "@/components/platform/PlatformShell";
 import { AIAssistantPanel } from "@/components/platform/AIAssistantPanel";
 import { LenderContent } from "@/components/platform/LenderContent";
@@ -51,8 +51,8 @@ export function LenderAIAssistantContent() {
     <PlatformShell role="LENDER">
       <LenderContent className="space-y-8">
         <header>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">FlowCapital AI</p>
-          <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight">Lender intelligence copilot</h1>
+          <BrandWordmark size="sm" className="mb-3" />
+          <h1 className="font-display text-3xl font-semibold tracking-tight">Lender intelligence copilot</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Understand production evidence, financing exposure, collateral and confidence before making a decision.
           </p>
@@ -72,9 +72,8 @@ export function LenderAIAssistantContent() {
           animate={{ opacity: 1, y: 0 }}
           className="rounded-[1.25rem] border border-foreground/10 bg-ink p-6 md:p-8"
         >
-          <div className="mb-4 flex items-center gap-2 text-lime">
-            <Sparkles className="h-5 w-5" />
-            <span className="text-sm font-semibold uppercase tracking-wide">FlowCapital AI</span>
+          <div className="mb-4">
+            <BrandWordmark inverted size="sm" />
           </div>
           {auth.token ? (
             <AIAssistantPanel

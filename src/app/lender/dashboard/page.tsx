@@ -1,14 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { PlatformShell } from "@/components/platform/PlatformShell";
 import { LenderContent } from "@/components/platform/LenderContent";
 import { LenderResourceCards } from "@/components/platform/LenderResourceCards";
 import { PlatformMetricCard } from "@/components/platform/PlatformMetricCard";
 import { useRequireRole } from "@/lib/auth/auth-context";
 import { formatINRCompact } from "@/lib/format";
-import { DEMO_REQUEST_ID } from "@/lib/platform/demo-fallback";
 import { fetchLenderDashboard } from "@/lib/platform/hooks";
 
 export default function LenderDashboardPage() {
@@ -56,51 +54,6 @@ export default function LenderDashboardPage() {
         </div>
 
         <LenderResourceCards pendingDocuments={pendingDocs || 1} pendingDecisions={pendingDecisions || 1} />
-
-        <section>
-          <div className="mb-4 flex items-end justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Financing requests</p>
-              <h2 className="font-display text-xl font-semibold">Requires review</h2>
-            </div>
-            <Link href="/lender/opportunities" className="text-sm font-semibold text-lime-deep hover:underline">
-              View all →
-            </Link>
-          </div>
-          {opportunities.slice(0, 1).map((item) => (
-            <div key={item.id} className="rounded-[1.25rem] border border-foreground/10 bg-white p-6">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{item.manufacturer_name}</p>
-                  <h3 className="font-display text-2xl font-semibold">{item.project_name}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{item.product_name} · {item.quantity.toLocaleString()} units</p>
-                </div>
-                <p className="text-xs font-semibold uppercase text-muted-foreground">Request {item.request_code}</p>
-              </div>
-              <div className="mt-4 grid gap-4 sm:grid-cols-3 text-sm">
-                <div><p className="text-muted-foreground">Requested</p><p className="font-display text-xl font-semibold">{formatINRCompact(item.requested_funding)}</p></div>
-                <div><p className="text-muted-foreground">Confidence</p><p className="font-display text-xl font-semibold">{item.confidence_score}</p></div>
-                <div><p className="text-muted-foreground">Recommended max</p><p className="font-display text-xl font-semibold">{formatINRCompact(item.recommended_max)}</p></div>
-              </div>
-              <div className="mt-5">
-                <Link
-                  href={`/lender/opportunities/${item.id}/decision`}
-                  className="inline-flex items-center gap-2 rounded-xl bg-lime px-5 py-2.5 text-sm font-semibold text-ink hover:brightness-95"
-                >
-                  Review decision →
-                </Link>
-              </div>
-            </div>
-          ))}
-          {opportunities.length === 0 ? (
-            <Link
-              href={`/lender/opportunities/${DEMO_REQUEST_ID}/decision`}
-              className="inline-flex rounded-xl bg-lime px-5 py-2.5 text-sm font-semibold text-ink"
-            >
-              Review demo request →
-            </Link>
-          ) : null}
-        </section>
       </LenderContent>
     </PlatformShell>
   );

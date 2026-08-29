@@ -17,7 +17,19 @@ def _context_for(user, request_id: str | None) -> dict:
         req = demo_store.get_request(rid, user.id, user.role)
     if not req:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Request not found for AI context")
-    return req.get("ai_context") or demo_store._ai_context(req)
+    context = req.get("ai_context") or demo_store._ai_context(req)
+    if user.role == "MANUFACTURER":
+        try:
+            context["marketplace_offers"] = demo_store.list_manufacturer_offers(rid, user.id)
+            context["exposure"] = demo_store.get_exposure(rid, user.id, user.role)
+        except ValueError:
+            pass
+    elif user.role == "LENDER" and req.get("marketplace"):
+        context["marketplace"] = req["marketplace"]
+        exp = demo_store.get_exposure(rid, user.id, user.role, lender_view=True)
+        if exp:
+            context["exposure"] = exp
+    return context
 
 
 @router.get("/health")

@@ -35,9 +35,12 @@ export function ProductionRequestDetail({ request, token, onRefresh }: Productio
           <span className="rounded-full border border-foreground/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide">
             {request.status.replace(/_/g, " ")}
           </span>
-          <span className="rounded-full bg-lime/25 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-ink">
-            {approvedAmount > 0 ? `${formatINRCompact(approvedAmount)} approved` : "Pending approval"}
-          </span>
+          <Link
+            href={`/manufacturer/financing-request/${request.id}/offers`}
+            className="inline-flex items-center gap-2 rounded-full bg-lime px-4 py-2 text-xs font-semibold uppercase tracking-wide text-ink transition hover:brightness-95"
+          >
+            Compare lender offers
+          </Link>
           <Link
             href="/manufacturer/ai-assistant"
             className="inline-flex items-center gap-2 rounded-full border border-foreground/10 px-4 py-2 text-xs font-semibold text-muted-foreground transition hover:border-lime hover:text-ink"
@@ -48,7 +51,7 @@ export function ProductionRequestDetail({ request, token, onRefresh }: Productio
         </div>
       </header>
 
-      <PhysicalGoodsLifecycleStepper currentStage={request.current_stage} progress={request.progress_pct} />
+      <PhysicalGoodsLifecycleStepper currentStage={request.current_stage} progress={request.progress_pct} variant="premium" />
 
       <ManufacturerSection title="Production Summary">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

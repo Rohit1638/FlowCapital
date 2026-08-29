@@ -18,9 +18,17 @@ interface AuthContextValue {
   token: string | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<void>;
-  register: (payload: { username: string; password: string; confirm_password: string; role: UserRole; company_name?: string }) => Promise<void>;
+  register: (payload: {
+    username: string;
+    password: string;
+    confirm_password: string;
+    role: UserRole;
+    company_name?: string;
+    phone: string;
+  }) => Promise<void>;
   loginDemo: (role: UserRole) => Promise<void>;
   logout: () => void;
+  clearSession: () => void;
   authHeaders: () => Record<string, string>;
   error: string | null;
 }
@@ -118,7 +126,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const register = useCallback(
-    async (payload: { username: string; password: string; confirm_password: string; role: UserRole; company_name?: string }) => {
+    async (payload: {
+      username: string;
+      password: string;
+      confirm_password: string;
+      role: UserRole;
+      company_name?: string;
+      phone: string;
+    }) => {
       setLoading(true);
       setError(null);
       try {
@@ -151,11 +166,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [login, loginWithDemoToken],
   );
 
-  const logout = useCallback(() => {
+  const clearSession = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
     setState(null);
+    setError(null);
+  }, []);
+
+  const logout = useCallback(() => {
+    clearSession();
     router.push("/login");
-  }, [router]);
+  }, [clearSession, router]);
 
   const authHeaders = useCallback((): Record<string, string> => {
     if (!state?.token) return {};
@@ -171,10 +191,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register,
       loginDemo,
       logout,
+      clearSession,
       authHeaders,
       error,
     }),
-    [state, loading, login, register, loginDemo, logout, authHeaders, error],
+    [state, loading, login, register, loginDemo, logout, clearSession, authHeaders, error],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

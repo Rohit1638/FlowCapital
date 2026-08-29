@@ -17,19 +17,16 @@ export function LandingNav() {
         <a href="#memory" className="hover:text-ink">
           Financial memory
         </a>
-        <Link href="/login" className="hover:text-ink">
+        <Link href="/login?portal=1" className="hover:text-ink">
           Platform Login
-        </Link>
-        <Link href="/dashboard" className="hover:text-ink">
-          Command Center
         </Link>
       </div>
       <div className="flex items-center gap-2">
         <Button asChild variant="outline" size="sm" className="hidden md:inline-flex">
-          <Link href="/login">Manufacturer / Lender</Link>
+          <Link href="/register">Create account</Link>
         </Button>
         <Button asChild variant="dark" size="sm">
-          <Link href="/dashboard">Command Center</Link>
+          <Link href="/login?portal=1">Sign in</Link>
         </Button>
       </div>
     </header>

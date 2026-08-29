@@ -32,6 +32,12 @@ class Settings(BaseSettings):
     mismatch_medium_pct: float = 5.0
     mismatch_high_pct: float = 15.0
 
+    n8n_telemetry_webhook_url: str | None = None
+    n8n_risk_alert_webhook_url: str | None = None
+    n8n_webhook_secret: str | None = None
+    n8n_default_alert_phone: str = "+919943666848"
+    public_base_url: str | None = None
+
     @field_validator("database_url")
     @classmethod
     def require_database_url(cls, value: str) -> str:

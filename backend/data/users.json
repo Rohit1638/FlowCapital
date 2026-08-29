@@ -8,7 +8,8 @@
       "role": "MANUFACTURER",
       "company_name": "VoltRide Mobility Pvt. Ltd.",
       "full_name": "Demo Manufacturer",
-      "designation": "Operations Lead"
+      "designation": "Operations Lead",
+      "phone": "+919876543210"
     },
     {
       "id": "00000000-0000-4000-8000-000000000002",
@@ -18,7 +19,107 @@
       "role": "LENDER",
       "company_name": "Apex Capital Partners",
       "full_name": "Demo Lender",
-      "designation": "Underwriter"
+      "designation": "Underwriter",
+      "phone": "+919876543211"
+    },
+    {
+      "id": "7a9c04f8-3922-4744-be93-0ba5cf1ac1a3",
+      "username": "demo_user_15745",
+      "email": "demo_user_15745@flowcapital.internal",
+      "password_hash": "$2b$12$J0IkaekJFsTscmVsIe4kSOg.BDOxx1V5drKu/RtSSsMi8zyBur3Oq",
+      "role": "MANUFACTURER",
+      "company_name": "Test Mobility Pvt Ltd",
+      "full_name": "Demo User 15745",
+      "designation": "Member",
+      "phone": "+919988776655"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000004",
+      "username": "conservative_demo",
+      "email": "conservative_demo@flowcapital.internal",
+      "password_hash": "$2b$12$Q43NwDnRn.sbMmG/biapO.Cjno4MPfwG..TOXZR8dVAiEaAWI0Qt6",
+      "role": "LENDER",
+      "company_name": "Conservative Capital Partners",
+      "full_name": "Conservative Lender",
+      "designation": "Senior Credit Officer",
+      "phone": "+919943666848"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000005",
+      "username": "aggressive_demo",
+      "email": "aggressive_demo@flowcapital.internal",
+      "password_hash": "$2b$12$3UhSpTGi0kB7IPd0qDw45ODtQom8yMPh.V3Xpr0/I4z8vorICBlr6",
+      "role": "LENDER",
+      "company_name": "Aggressive Supply Chain Capital",
+      "full_name": "Aggressive Lender",
+      "designation": "Portfolio Manager",
+      "phone": "+919943666848"
+    },
+    {
+      "id": "6ce680c5-ba66-44a1-9a80-ad7edc76c4e8",
+      "username": "Rohit Ram B",
+      "email": "rohit_ram_b@flowcapital.internal",
+      "password_hash": "$2b$12$m/rVJJ81ncexEefOL/YFiOY2ix.8z5o2BiYODd2m8Tv9wBNs/zI4a",
+      "role": "LENDER",
+      "company_name": "RR Company",
+      "full_name": "Rohit Ram B",
+      "designation": "Member",
+      "phone": "+919043775875"
+    },
+    {
+      "id": "cfc5a7d5-100e-4259-a2ad-4204d5fa3460",
+      "username": "rohit",
+      "email": "rohit@flowcapital.internal",
+      "password_hash": "$2b$12$G.qFB7QzPCTlvgt4vnI6M.PUeHyjdHUW/lh9yxGCAp3egefCdLhr6",
+      "role": "MANUFACTURER",
+      "company_name": "raam academy",
+      "full_name": "Rohit",
+      "designation": "Member",
+      "phone": "+919843066848"
+    },
+    {
+      "id": "b12cbac8-8d5a-43f7-a725-aacf73dee9a7",
+      "username": "rohit2",
+      "email": "rohit2@flowcapital.internal",
+      "password_hash": "$2b$12$.1opeDjxmJweIJIhU.sx3ujCQ7alUEjIinUTH6aBGYzUTXpwS7lvy",
+      "role": "MANUFACTURER",
+      "company_name": "raam academy",
+      "full_name": "Rohit2",
+      "designation": "Member",
+      "phone": "+919843066848"
+    },
+    {
+      "id": "b81d9ea4-2d17-4670-a976-fefa42ac7850",
+      "username": "rohit3",
+      "email": "rohit3@flowcapital.internal",
+      "password_hash": "$2b$12$7vbkQFQKNS0pit8d5mUO5OySAe5wtRK1p/AgAhvEIR28lsKRllzhy",
+      "role": "MANUFACTURER",
+      "company_name": "raam academy",
+      "full_name": "Rohit3",
+      "designation": "Member",
+      "phone": "+919843066848"
+    },
+    {
+      "id": "be0f5a32-7312-4642-94f8-4bcedafe6a77",
+      "username": "rohit16",
+      "email": "rohit16@flowcapital.internal",
+      "password_hash": "$2b$12$kL.sXxpH3hoLXb/o9FMwJO6PBIteOanClxf41lMTfp8mfC6v43xRu",
+      "role": "MANUFACTURER",
+      "company_name": "raam academy",
+      "full_name": "Rohit16",
+      "designation": "Member",
+      "phone": "+919843066848"
+    },
+    {
+      "id": "fa074e69-db42-472c-b7f2-5019fda0dd4e",
+      "username": "sachit",
+      "email": "sachit@flowcapital.internal",
+      "password_hash": "$2b$12$V9Tx8tevS8AP1QCkRLL9Z.yjPe5sm51ksDUqs/xMy/Gx3DsPMpPi6",
+      "role": "LENDER",
+      "company_name": "ABC Bankers",
+      "full_name": "Sachit",
+      "designation": "Member",
+      "phone": "+919943666848"
     }
   ]
 }
